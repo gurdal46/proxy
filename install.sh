@@ -13,9 +13,9 @@ gen64() {
 }
 install_3proxy() {
     echo "installing 3proxy"
-    URL="https://github.com/z3APA3A/3proxy/archive/0.8.13.tar.gz"
+    URL="https://github.com/z3APA3A/3proxy/archive/0.8.9.tar.gz"
     wget -qO- $URL | bsdtar -xvf-
-    cd 3proxy-3proxy-0.8.13
+    cd 3proxy-0.8.13
     make -f Makefile.Linux
     mkdir -p /usr/local/etc/3proxy/{bin,logs,stat}
     cp src/3proxy /usr/local/etc/3proxy/bin/
@@ -51,19 +51,11 @@ $(awk -F "/" '{print $3 ":" $4 ":" $1 ":" $2 }' ${WORKDATA})
 EOF
 }
 
-upload_proxy() {
-    local PASS=$(random)
-    zip --password $PASS proxy.zip proxy.txt
-    URL=$(curl -s --upload-file proxy.zip https://transfer.sh/proxy.zip)
 
-    echo "Proxy is ready! Format IP:PORT:LOGIN:PASS"
-    echo "Download zip archive from: ${URL}"
-    echo "Password: ${PASS}"
-
-}
 gen_data() {
     seq $FIRST_PORT $LAST_PORT | while read port; do
-        echo "usr$(random)/pass$(random)/$IP4/$port/$(gen64 $IP6)"
+
+        echo "4kviews/4kviews/$IP4/$port/$(gen64 $IP6)"
     done
 }
 
@@ -75,7 +67,7 @@ EOF
 
 gen_ifconfig() {
     cat <<EOF
-$(awk -F "/" '{print "ifconfig ens3 inet6 add " $5 "/64"}' ${WORKDATA})
+$(awk -F "/" '{print "ifconfig eth0 inet6 add " $5 "/64"}' ${WORKDATA})
 EOF
 }
 echo "installing apps"
@@ -93,9 +85,8 @@ IP6=$(curl -6 -s icanhazip.com | cut -f1-4 -d':')
 
 echo "Internal ip = ${IP4}. Exteranl sub for ip6 = ${IP6}"
 
-echo "How many proxy do you want to create? Example 500"
-read COUNT
 
+COUNT=500
 FIRST_PORT=10000
 LAST_PORT=$(($FIRST_PORT + $COUNT))
 
@@ -116,5 +107,3 @@ EOF
 bash /etc/rc.local
 
 gen_proxy_file_for_user
-
-upload_proxy
